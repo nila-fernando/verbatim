@@ -1,65 +1,126 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowRight } from "lucide-react";
+import AnimatedGradientBackground from "@/components/ui/animated-gradient-background";
+import { UploadPanel } from "@/components/upload/upload-panel";
+import { ChatContainer } from "@/components/chat/ChatContainer";
+
+const GRADIENT_COLORS = [
+  "#0A0A0A",
+  "#1a1a2e",
+  "#16213e",
+  "#0f3460",
+  "#533483",
+  "#e94560",
+  "#2979FF",
+];
+const GRADIENT_STOPS = [30, 45, 55, 65, 75, 85, 100];
 
 export default function Home() {
+  const [started, setStarted] = useState(false);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <main className="relative min-h-screen">
+      {/* Persistent gradient — shared between hero and app so the transition feels seamless */}
+      <AnimatedGradientBackground
+        Breathing
+        startingGap={110}
+        breathingRange={20}
+        animationSpeed={0.08}
+        topOffset={-10}
+        gradientColors={GRADIENT_COLORS}
+        gradientStops={GRADIENT_STOPS}
+      />
+      <div className="absolute inset-0 z-[1] bg-black/20" />
+
+      <AnimatePresence mode="wait">
+        {!started ? (
+          <motion.div
+            key="landing"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, scale: 0.97, filter: "blur(6px)" }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            <div className="flex flex-col items-center space-y-6">
+              <motion.h1
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.6 }}
+                className="text-center font-display text-6xl font-semibold lowercase tracking-tight text-white drop-shadow-[0_10px_40px_rgba(255,255,255,0.15)] md:text-7xl"
+              >
+                verbatim
+              </motion.h1>
+
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.35, duration: 0.6 }}
+                className="text-center text-lg lowercase text-white/70"
+              >
+                (aka the TA that actually read everything)
+              </motion.p>
+
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5, duration: 0.6 }}
+                className="mx-auto max-w-xl text-center lowercase text-white/50"
+              >
+                upload your lecture slides, research papers, or course notes.
+                {" "}ask anything :) verbatim finds the answer and cites the
+                exact page it came from.
+              </motion.p>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.65, duration: 0.6 }}
+                className="pt-2"
+              >
+                <button
+                  onClick={() => setStarted(true)}
+                  className="flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-6 py-3 text-base font-medium text-white backdrop-blur transition hover:bg-white/20"
+                >
+                  Get Started
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </motion.div>
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="app"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            className="relative z-10 flex h-screen flex-col overflow-hidden"
           >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+            {/* Header */}
+            <div className="shrink-0 px-6 pt-5 pb-3 lg:px-8">
+              <h1 className="font-display text-lg font-semibold lowercase tracking-tight text-white/80">
+                verbatim
+              </h1>
+            </div>
+
+            {/* Main content — full width, two columns on desktop */}
+            <div className="grid min-h-0 flex-1 grid-cols-1 gap-0 px-6 pb-6 lg:grid-cols-[280px_1fr] lg:gap-6 lg:px-8">
+              {/* Upload sidebar */}
+              <div className="shrink-0 overflow-y-auto lg:border-r lg:border-white/[0.06] lg:pr-6">
+                <UploadPanel />
+              </div>
+
+              {/* Chat fills all remaining space */}
+              <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+                <ChatContainer />
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </main>
   );
 }

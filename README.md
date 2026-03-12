@@ -1,36 +1,144 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DocAtlas — AI Document Navigator
+
+Upload lecture slides and study notes as PDFs, ask questions, and generate quizzes. All answers cite exact source pages using retrieval augmented generation (RAG).
+
+## Tech Stack
+
+- **Frontend:** Next.js (App Router), React, TypeScript, Tailwind CSS, shadcn/ui, Framer Motion
+- **AI:** OpenAI GPT-4o-mini (responses), text-embedding-3-small (embeddings)
+- **Vector Store:** In-memory cosine similarity search
+- **PDF Processing:** pdf-parse v2
 
 ## Getting Started
 
-First, run the development server:
+### 1. Install dependencies
+
+```bash
+npm install
+```
+
+### 2. Set up environment variables
+
+Copy the example env file and add your OpenAI API key:
+
+```bash
+cp .env.example .env.local
+```
+
+Then edit `.env.local`:
+
+```
+OPENAI_API_KEY=sk-your-actual-api-key
+```
+
+### 3. Run the dev server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Features
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### PDF Upload (`POST /api/upload`)
 
-## Learn More
+- Upload one or more PDFs via drag-and-drop or file picker
+- Text extraction with page number preservation
+- Automatic chunking (~500 tokens per chunk with overlap)
+- Embedding generation and vector storage
 
-To learn more about Next.js, take a look at the following resources:
+### Question Answering (`POST /api/query`)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Ask questions about your uploaded documents
+- RAG pipeline: embed query → retrieve top 5 chunks → generate answer
+- Responses include inline citations with document name and page number
+- Each source includes the actual text excerpt used
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Quiz Generation (`POST /api/quiz`)
 
-## Deploy on Vercel
+- Generate exam-style questions grounded in your document content
+- Customizable prompts (e.g., "Generate 5 questions about search algorithms")
+- Questions are based on retrieved document chunks
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Project Structure
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+app/
+  page.tsx              # Landing page + main app interface
+  layout.tsx            # Root layout
+  api/
+    upload/route.ts     # PDF upload endpoint
+    query/route.ts      # RAG question answering endpoint
+    quiz/route.ts       # Quiz generation endpoint
+components/
+  ui/                   # shadcn/ui components + animated gradient
+  chat/                 # Chat interface + quiz generator
+  upload/               # Upload panel
+lib/
+  pdf/
+    extract.ts          # PDF text extraction
+    chunker.ts          # Text chunking with metadata
+  embeddings/
+    openai.ts           # OpenAI embedding generation
+  vectorstore/
+    store.ts            # In-memory vector store with cosine similarity
+  rag/
+    pipeline.ts         # RAG query + quiz generation pipeline
+```
+
+## API Reference
+
+### Upload Documents
+
+```
+POST /api/upload
+Content-Type: multipart/form-data
+
+Body: files (one or more PDF files)
+```
+
+### Ask a Question
+
+```
+POST /api/query
+Content-Type: application/json
+
+{ "question": "What is A* search?" }
+```
+
+Response:
+
+```json
+{
+  "answer": "A* search is an informed search algorithm...",
+  "sources": [
+    {
+      "document": "Lecture6.pdf",
+      "page": 14,
+      "excerpt": "A heuristic is admissible if it never overestimates..."
+    }
+  ]
+}
+```
+
+### Generate Quiz
+
+```
+POST /api/quiz
+Content-Type: application/json
+
+{ "prompt": "Generate 5 exam questions" }
+```
+
+Response:
+
+```json
+{
+  "questions": [
+    "What is an admissible heuristic?",
+    "Explain how A* search works",
+    "Why must heuristics not overestimate?"
+  ]
+}
+```
