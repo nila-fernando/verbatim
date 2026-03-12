@@ -51,7 +51,7 @@ npm run dev
 - Ask questions about your uploaded documents
 - Responses include inline citations with document name and page number
 
-### Quiz Generation (`POST /api/quiz`)
+### Quiz Generation
 
 - Generate exam-style questions grounded in your document content
 - Customizable prompts (e.g., "Generate 5 questions about search algorithms")
