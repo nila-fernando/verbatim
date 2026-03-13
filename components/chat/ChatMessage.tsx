@@ -15,10 +15,18 @@ export interface Message {
 
 interface ChatMessageProps {
   message: Message;
+  pdfUrls?: Record<string, string>;
 }
 
-export function ChatMessage({ message }: ChatMessageProps) {
+export function ChatMessage({ message, pdfUrls = {} }: ChatMessageProps) {
   const isUser = message.role === "user";
+
+  const handleSourceClick = (source: Source) => {
+    const url = pdfUrls[source.document];
+    if (url) {
+      window.open(`${url}#page=${source.page}`, "_blank");
+    }
+  };
 
   return (
     <div className="space-y-2">
@@ -34,16 +42,29 @@ export function ChatMessage({ message }: ChatMessageProps) {
 
       {message.sources && message.sources.length > 0 && (
         <div className="space-y-1">
-          {message.sources.map((source, i) => (
-            <p key={i} className="text-xs text-white/30">
-              {source.document} · page {source.page}
-              {source.excerpt && (
-                <span className="ml-1 text-white/20">
-                  — &ldquo;{source.excerpt.length > 80 ? source.excerpt.slice(0, 80) + "..." : source.excerpt}&rdquo;
+          {message.sources.map((source, i) => {
+            const hasUrl = !!pdfUrls[source.document];
+            return (
+              <p
+                key={i}
+                className={`text-xs text-white/30 ${
+                  hasUrl
+                    ? "cursor-pointer transition-colors hover:text-white/50"
+                    : ""
+                }`}
+                onClick={hasUrl ? () => handleSourceClick(source) : undefined}
+              >
+                <span className={hasUrl ? "underline underline-offset-2 decoration-white/20" : ""}>
+                  {source.document} · page {source.page}
                 </span>
-              )}
-            </p>
-          ))}
+                {source.excerpt && (
+                  <span className="ml-1 text-white/20">
+                    — &ldquo;{source.excerpt.length > 80 ? source.excerpt.slice(0, 80) + "..." : source.excerpt}&rdquo;
+                  </span>
+                )}
+              </p>
+            );
+          })}
         </div>
       )}
     </div>

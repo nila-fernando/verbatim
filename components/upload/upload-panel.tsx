@@ -12,9 +12,10 @@ interface UploadResult {
 
 interface UploadPanelProps {
   onUploadComplete?: () => void;
+  onPdfStored?: (filename: string, url: string) => void;
 }
 
-export function UploadPanel({ onUploadComplete }: UploadPanelProps) {
+export function UploadPanel({ onUploadComplete, onPdfStored }: UploadPanelProps) {
   const [uploading, setUploading] = useState(false);
   const [results, setResults] = useState<UploadResult[]>([]);
   const [dragOver, setDragOver] = useState(false);
@@ -27,6 +28,10 @@ export function UploadPanel({ onUploadComplete }: UploadPanelProps) {
       if (pdfFiles.length === 0) return;
 
       setUploading(true);
+      pdfFiles.forEach((file) => {
+        const url = URL.createObjectURL(file);
+        onPdfStored?.(file.name, url);
+      });
       const formData = new FormData();
       pdfFiles.forEach((file) => formData.append("files", file));
 
@@ -64,7 +69,7 @@ export function UploadPanel({ onUploadComplete }: UploadPanelProps) {
         setUploading(false);
       }
     },
-    [onUploadComplete]
+    [onUploadComplete, onPdfStored]
   );
 
   const handleDrop = useCallback(

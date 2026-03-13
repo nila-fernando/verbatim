@@ -13,7 +13,11 @@ const EXAMPLE_PROMPTS = [
   "what's on the exam?",
 ];
 
-export function ChatContainer() {
+interface ChatContainerProps {
+  pdfUrls?: Record<string, string>;
+}
+
+export function ChatContainer({ pdfUrls = {} }: ChatContainerProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -78,41 +82,43 @@ export function ChatContainer() {
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col">
       {/* Scrollable messages */}
-      <div className="flex-1 space-y-6 overflow-y-auto py-4">
-        {messages.length === 0 && !loading && (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <p className="mb-6 text-sm text-white/25">
-              ask anything about your documents
-            </p>
-            <div className="flex flex-wrap justify-center gap-2">
-              {EXAMPLE_PROMPTS.map((prompt) => (
-                <button
-                  key={prompt}
-                  onClick={() => sendMessage(prompt)}
-                  className="rounded-full border border-white/10 bg-white/[0.03] px-3.5 py-1.5 text-xs text-white/40 transition-all hover:border-white/20 hover:bg-white/[0.07] hover:text-white/60"
-                >
-                  {prompt}
-                </button>
-              ))}
+      <div className="flex-1 overflow-y-auto py-4">
+        <div className="mx-auto max-w-3xl space-y-6">
+          {messages.length === 0 && !loading && (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <p className="mb-6 text-sm text-white/25">
+                ask anything about your documents
+              </p>
+              <div className="flex flex-wrap justify-center gap-2">
+                {EXAMPLE_PROMPTS.map((prompt) => (
+                  <button
+                    key={prompt}
+                    onClick={() => sendMessage(prompt)}
+                    className="rounded-full border border-white/10 bg-white/[0.03] px-3.5 py-1.5 text-xs text-white/40 transition-all hover:border-white/20 hover:bg-white/[0.07] hover:text-white/60"
+                  >
+                    {prompt}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {messages.map((msg) => (
-          <ChatMessage key={msg.id} message={msg} />
-        ))}
+          {messages.map((msg) => (
+            <ChatMessage key={msg.id} message={msg} pdfUrls={pdfUrls} />
+          ))}
 
-        {loading && (
-          <div className="w-fit max-w-[70%] rounded-2xl bg-white/5 px-4 py-3 text-sm text-white/40">
-            thinking...
-          </div>
-        )}
+          {loading && (
+            <div className="w-fit max-w-[70%] rounded-2xl bg-white/5 px-4 py-3 text-sm text-white/40">
+              thinking...
+            </div>
+          )}
 
-        <div ref={messagesEndRef} />
+          <div ref={messagesEndRef} />
+        </div>
       </div>
 
       {/* Prompt input pinned to bottom */}
-      <div className="shrink-0 pt-3">
+      <div className="mx-auto w-full max-w-3xl shrink-0 pt-3">
         <PromptInputBox
           onSend={sendMessage}
           isLoading={loading}
