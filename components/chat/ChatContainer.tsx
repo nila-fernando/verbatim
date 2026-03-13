@@ -30,6 +30,10 @@ export function ChatContainer({ pdfUrls = {} }: ChatContainerProps) {
     scrollToBottom();
   }, [messages, loading]);
 
+  const isQuizRequest = (text: string) =>
+    /\b(quiz|exam|test)\b.*\b(question|problem)/i.test(text) ||
+    /\b(generate|create|make|give)\b.*\b(question|problem)/i.test(text);
+
   const sendMessage = async (text: string) => {
     const question = text.trim();
     if (!question || loading) return;
@@ -44,27 +48,55 @@ export function ChatContainer({ pdfUrls = {} }: ChatContainerProps) {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/query", {
+      const quiz = isQuizRequest(question);
+      const endpoint = quiz ? "/api/quiz" : "/api/query";
+      const payload = quiz
+        ? { prompt: question }
+        : { question };
+
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question }),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
 
-      const content = response.ok
-        ? data.answer || "No answer returned."
-        : data.error || `Request failed (${response.status})`;
+      if (!response.ok) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: (Date.now() + 1).toString(),
+            role: "assistant",
+            content: data.error || `Request failed (${response.status})`,
+          },
+        ]);
+        return;
+      }
 
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: (Date.now() + 1).toString(),
-          role: "assistant",
-          content,
-          sources: response.ok ? data.sources : undefined,
-        },
-      ]);
+      if (quiz && data.questions) {
+        const formatted = data.questions
+          .map((q: string, i: number) => `${i + 1}. ${q}`)
+          .join("\n");
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: (Date.now() + 1).toString(),
+            role: "assistant",
+            content: `here are your quiz questions:\n\n${formatted}`,
+          },
+        ]);
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: (Date.now() + 1).toString(),
+            role: "assistant",
+            content: data.answer || "No answer returned.",
+            sources: data.sources,
+          },
+        ]);
+      }
     } catch {
       setMessages((prev) => [
         ...prev,

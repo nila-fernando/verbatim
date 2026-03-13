@@ -1,4 +1,4 @@
-import { PDFParse } from "pdf-parse";
+import { extractText } from "unpdf";
 
 export interface PDFPage {
   pageNumber: number;
@@ -15,19 +15,16 @@ export async function extractTextFromPDF(
   buffer: Buffer,
   filename: string
 ): Promise<PDFExtraction> {
-  const parser = new PDFParse({ data: new Uint8Array(buffer) });
-  const textResult = await parser.getText();
+  const { text, totalPages } = await extractText(new Uint8Array(buffer), {
+    mergePages: false,
+  });
 
-  const pages: PDFPage[] = textResult.pages
-    .map((page) => ({
-      pageNumber: page.num,
-      text: page.text.trim(),
+  const pages: PDFPage[] = (text as string[])
+    .map((pageText, i) => ({
+      pageNumber: i + 1,
+      text: pageText.trim(),
     }))
     .filter((page) => page.text.length > 0);
-
-  const totalPages = textResult.total;
-
-  await parser.destroy();
 
   return {
     filename,
