@@ -1,13 +1,14 @@
 # Verbatim
+(aka the TA that actually read everything)
 
-Upload lecture slides and study notes as PDFs, ask questions and generate quizzes. All answers cite exact source pages using retrieval augmented generation (RAG).
+Upload your lecture slides, research papers, or course notes. Ask anything and verbatim finds the answer and cites the exact page it came from.
 
 ## Tech Stack
 
-- **Frontend:** Next.js (App Router), React, TypeScript, Tailwind CSS, shadcn/ui, Framer Motion
-- **AI:** OpenAI GPT-4o-mini (responses), text-embedding-3-small (embeddings)
-- **Vector Store:** In-memory cosine similarity search
-- **PDF Processing:** pdf-parse v2
+- **Framework:** Next.js 16 (App Router), React 19, TypeScript
+- **UI:** Tailwind CSS, shadcn/ui, Framer Motion, Lottie
+- **AI:** OpenAI GPT-4o-mini (generation)
+- **Vector DB:** Upstash Vector
 
 ## Getting Started
 
@@ -19,17 +20,19 @@ npm install
 
 ### 2. Set up environment variables
 
-Copy the example env file and add your OpenAI API key:
-
-```bash
-cp .env.example .env.local
-```
-
-Then edit `.env.local`:
+Create a `.env.local` file:
 
 ```
-OPENAI_API_KEY=sk-your-actual-api-key
+OPENAI_API_KEY=sk-your-openai-api-key
+UPSTASH_VECTOR_REST_URL=https://your-index.upstash.io
+UPSTASH_VECTOR_REST_TOKEN=your-token
 ```
+
+**OpenAI** — get a key at [platform.openai.com](https://platform.openai.com)
+
+**Upstash Vector** — create a free index at [console.upstash.com](https://console.upstash.com):
+- Dimensions: `1536`
+- Similarity metric: `Cosine`
 
 ### 3. Run the dev server
 
@@ -40,18 +43,12 @@ npm run dev
 ## Features
 
 ### PDF Upload
+- Drag-and-drop or file picker
 
-- Upload one or more PDFs via drag-and-drop or file picker
-- Text extraction with page number preservation
-- Automatic chunking (~500 tokens per chunk with overlap)
-- Embedding generation and vector storage
-
-### Question Answering
-
-- Ask questions about your uploaded documents
-- Responses include inline citations with document name and page number
+### Question Answering (RAG :D)
+- GPT-4o-mini generates grounded answers with inline citations
+- Clickable citations open the PDF at the cited page
 
 ### Quiz Generation
-
-- Generate exam-style questions grounded in your document content
-- Customizable prompts (e.g., "Generate 5 questions about search algorithms")
+- Detected automatically from natural language (e.g. "generate 5 quiz questions")
+- Generates questions based on context
