@@ -55,5 +55,9 @@ class InMemoryVectorStore {
   }
 }
 
-// Singleton instance persists across API calls during the server's lifetime
-export const vectorStore = new InMemoryVectorStore();
+// Persist across module reloads in the same serverless instance (Vercel / dev HMR)
+const g = globalThis as unknown as { __vectorStore?: InMemoryVectorStore };
+if (!g.__vectorStore) {
+  g.__vectorStore = new InMemoryVectorStore();
+}
+export const vectorStore = g.__vectorStore;
