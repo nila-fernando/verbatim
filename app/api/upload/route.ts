@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
         const chunks = chunkDocument(extraction);
         const embeddings = await generateEmbeddings(chunks.map((c) => c.text));
 
-        vectorStore.add(chunks, embeddings);
+        await vectorStore.add(chunks, embeddings);
 
         results.push({
           filename: file.name,
@@ -58,11 +58,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const totalChunks = await vectorStore.getChunkCount();
+
     return NextResponse.json({
       message: "Upload complete",
       results,
-      totalDocuments: vectorStore.getDocumentNames().length,
-      totalChunks: vectorStore.getChunkCount(),
+      totalChunks,
     });
   } catch (error) {
     console.error("Upload error:", error);

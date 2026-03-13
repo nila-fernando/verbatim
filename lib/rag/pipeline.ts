@@ -99,7 +99,7 @@ Return ONLY valid JSON.`;
 
 export async function queryDocuments(question: string): Promise<QueryResult> {
   const queryEmbedding = await generateEmbedding(question);
-  const relevantChunks = vectorStore.search(queryEmbedding, 5);
+  const relevantChunks = await vectorStore.search(queryEmbedding, 5);
 
   if (relevantChunks.length === 0) {
     return {
@@ -141,7 +141,7 @@ export async function queryDocuments(question: string): Promise<QueryResult> {
 
 export async function generateQuiz(prompt: string): Promise<QuizResult> {
   const queryEmbedding = await generateEmbedding(prompt);
-  const relevantChunks = vectorStore.search(queryEmbedding, 10);
+  const relevantChunks = await vectorStore.search(queryEmbedding, 10);
 
   if (relevantChunks.length === 0) {
     return {
