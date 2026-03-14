@@ -2,7 +2,7 @@
 (aka the TA that actually read everything)
 
 Upload your lecture slides, research papers, or course notes. Ask anything and verbatim finds the answer and cites the exact page it came from.
-Live demo: verbatim-three.vercel.app
+Live demo: [verbatim-v1.vercel.app](https://verbatim-v1.vercel.app/)
 
 ## How it Works
 
