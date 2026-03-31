@@ -97,9 +97,12 @@ Respond in JSON format:
 Return ONLY valid JSON.`;
 }
 
-export async function queryDocuments(question: string): Promise<QueryResult> {
+export async function queryDocuments(
+  question: string,
+  sessionId: string
+): Promise<QueryResult> {
   const queryEmbedding = await generateEmbedding(question);
-  const relevantChunks = await vectorStore.search(queryEmbedding, 5);
+  const relevantChunks = await vectorStore.search(queryEmbedding, sessionId, 5);
 
   if (relevantChunks.length === 0) {
     return {
@@ -139,9 +142,12 @@ export async function queryDocuments(question: string): Promise<QueryResult> {
   return parsed;
 }
 
-export async function generateQuiz(prompt: string): Promise<QuizResult> {
+export async function generateQuiz(
+  prompt: string,
+  sessionId: string
+): Promise<QuizResult> {
   const queryEmbedding = await generateEmbedding(prompt);
-  const relevantChunks = await vectorStore.search(queryEmbedding, 10);
+  const relevantChunks = await vectorStore.search(queryEmbedding, sessionId, 10);
 
   if (relevantChunks.length === 0) {
     return {

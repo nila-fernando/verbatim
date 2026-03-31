@@ -15,9 +15,10 @@ const EXAMPLE_PROMPTS = [
 
 interface ChatContainerProps {
   pdfUrls?: Record<string, string>;
+  sessionId: string;
 }
 
-export function ChatContainer({ pdfUrls = {} }: ChatContainerProps) {
+export function ChatContainer({ pdfUrls = {}, sessionId }: ChatContainerProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -51,8 +52,8 @@ export function ChatContainer({ pdfUrls = {} }: ChatContainerProps) {
       const quiz = isQuizRequest(question);
       const endpoint = quiz ? "/api/quiz" : "/api/query";
       const payload = quiz
-        ? { prompt: question }
-        : { question };
+        ? { prompt: question, sessionId }
+        : { question, sessionId };
 
       const response = await fetch(endpoint, {
         method: "POST",

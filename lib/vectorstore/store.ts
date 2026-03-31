@@ -21,8 +21,12 @@ function getIndex(): Index<ChunkMetadata> {
 }
 
 export const vectorStore = {
-  async add(chunks: DocumentChunk[], embeddings: number[][]): Promise<void> {
-    const index = getIndex();
+  async add(
+    chunks: DocumentChunk[],
+    embeddings: number[][],
+    sessionId: string
+  ): Promise<void> {
+    const ns = getIndex().namespace(sessionId);
     const vectors = chunks.map((chunk, i) => ({
       id: chunk.id,
       vector: embeddings[i],
@@ -35,13 +39,17 @@ export const vectorStore = {
 
     const batchSize = 100;
     for (let i = 0; i < vectors.length; i += batchSize) {
-      await index.upsert(vectors.slice(i, i + batchSize));
+      await ns.upsert(vectors.slice(i, i + batchSize));
     }
   },
 
-  async search(queryEmbedding: number[], topK: number = 5): Promise<DocumentChunk[]> {
-    const index = getIndex();
-    const results = await index.query<ChunkMetadata>({
+  async search(
+    queryEmbedding: number[],
+    sessionId: string,
+    topK: number = 5
+  ): Promise<DocumentChunk[]> {
+    const ns = getIndex().namespace(sessionId);
+    const results = await ns.query<ChunkMetadata>({
       vector: queryEmbedding,
       topK,
       includeMetadata: true,
@@ -59,20 +67,12 @@ export const vectorStore = {
       }));
   },
 
-  async getDocumentNames(): Promise<string[]> {
-    const index = getIndex();
-    const info = await index.info();
-    return info.vectorCount > 0 ? ["(documents stored)"] : [];
+  async getChunkCount(sessionId: string): Promise<number> {
+    const info = await getIndex().info();
+    return info.namespaces[sessionId]?.vectorCount ?? 0;
   },
 
-  async getChunkCount(): Promise<number> {
-    const index = getIndex();
-    const info = await index.info();
-    return info.vectorCount;
-  },
-
-  async clear(): Promise<void> {
-    const index = getIndex();
-    await index.reset();
+  async clear(sessionId: string): Promise<void> {
+    await getIndex().namespace(sessionId).reset();
   },
 };

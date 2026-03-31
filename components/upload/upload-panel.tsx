@@ -13,9 +13,10 @@ interface UploadResult {
 interface UploadPanelProps {
   onUploadComplete?: () => void;
   onPdfStored?: (filename: string, url: string) => void;
+  sessionId: string;
 }
 
-export function UploadPanel({ onUploadComplete, onPdfStored }: UploadPanelProps) {
+export function UploadPanel({ onUploadComplete, onPdfStored, sessionId }: UploadPanelProps) {
   const [uploading, setUploading] = useState(false);
   const [results, setResults] = useState<UploadResult[]>([]);
   const [dragOver, setDragOver] = useState(false);
@@ -34,6 +35,7 @@ export function UploadPanel({ onUploadComplete, onPdfStored }: UploadPanelProps)
       });
       const formData = new FormData();
       pdfFiles.forEach((file) => formData.append("files", file));
+      formData.append("sessionId", sessionId);
 
       try {
         const response = await fetch("/api/upload", {
@@ -69,7 +71,7 @@ export function UploadPanel({ onUploadComplete, onPdfStored }: UploadPanelProps)
         setUploading(false);
       }
     },
-    [onUploadComplete, onPdfStored]
+    [onUploadComplete, onPdfStored, sessionId]
   );
 
   const handleDrop = useCallback(

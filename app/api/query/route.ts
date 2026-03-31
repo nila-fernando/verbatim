@@ -4,7 +4,7 @@ import { queryDocuments } from "@/lib/rag/pipeline";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { question } = body;
+    const { question, sessionId } = body;
 
     if (!question || typeof question !== "string") {
       return NextResponse.json(
@@ -13,7 +13,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await queryDocuments(question);
+    if (!sessionId || typeof sessionId !== "string") {
+      return NextResponse.json(
+        { error: "Session ID is required" },
+        { status: 400 }
+      );
+    }
+
+    const result = await queryDocuments(question, sessionId);
     return NextResponse.json(result);
   } catch (error) {
     console.error("Query error:", error);

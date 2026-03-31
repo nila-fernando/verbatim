@@ -8,6 +8,11 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const files = formData.getAll("files") as File[];
+    const sessionId = formData.get("sessionId");
+
+    if (!sessionId || typeof sessionId !== "string") {
+      return NextResponse.json({ error: "Session ID is required" }, { status: 400 });
+    }
 
     if (!files || files.length === 0) {
       return NextResponse.json({ error: "No files provided" }, { status: 400 });
@@ -33,7 +38,7 @@ export async function POST(request: NextRequest) {
         const chunks = chunkDocument(extraction);
         const embeddings = await generateEmbeddings(chunks.map((c) => c.text));
 
-        await vectorStore.add(chunks, embeddings);
+        await vectorStore.add(chunks, embeddings, sessionId);
 
         results.push({
           filename: file.name,
@@ -58,7 +63,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const totalChunks = await vectorStore.getChunkCount();
+    const totalChunks = await vectorStore.getChunkCount(sessionId);
 
     return NextResponse.json({
       message: "Upload complete",

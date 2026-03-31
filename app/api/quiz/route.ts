@@ -4,7 +4,7 @@ import { generateQuiz } from "@/lib/rag/pipeline";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { prompt } = body;
+    const { prompt, sessionId } = body;
 
     if (!prompt || typeof prompt !== "string") {
       return NextResponse.json(
@@ -13,7 +13,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await generateQuiz(prompt);
+    if (!sessionId || typeof sessionId !== "string") {
+      return NextResponse.json(
+        { error: "Session ID is required" },
+        { status: 400 }
+      );
+    }
+
+    const result = await generateQuiz(prompt, sessionId);
     return NextResponse.json(result);
   } catch (error) {
     console.error("Quiz error:", error);

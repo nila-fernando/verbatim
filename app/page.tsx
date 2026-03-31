@@ -1,11 +1,20 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import AnimatedGradientBackground from "@/components/ui/animated-gradient-background";
 import { UploadPanel } from "@/components/upload/upload-panel";
 import { ChatContainer } from "@/components/chat/ChatContainer";
+
+function getOrCreateSessionId(): string {
+  const key = "verbatim_session_id";
+  const existing = sessionStorage.getItem(key);
+  if (existing) return existing;
+  const id = crypto.randomUUID();
+  sessionStorage.setItem(key, id);
+  return id;
+}
 
 const GRADIENT_COLORS = [
   "#0A0A0A",
@@ -21,6 +30,11 @@ const GRADIENT_STOPS = [30, 45, 55, 65, 75, 85, 100];
 export default function Home() {
   const [started, setStarted] = useState(false);
   const [pdfUrls, setPdfUrls] = useState<Record<string, string>>({});
+  const [sessionId, setSessionId] = useState<string>("");
+
+  useEffect(() => {
+    setSessionId(getOrCreateSessionId());
+  }, []);
 
   const handlePdfStored = useCallback((filename: string, url: string) => {
     setPdfUrls((prev) => ({ ...prev, [filename]: url }));
@@ -115,12 +129,12 @@ export default function Home() {
             <div className="grid min-h-0 flex-1 grid-cols-1 gap-0 px-6 pb-6 lg:grid-cols-[280px_1fr] lg:gap-6 lg:px-8">
               {/* Upload sidebar */}
               <div className="shrink-0 overflow-y-auto lg:border-r lg:border-white/[0.06] lg:pr-6">
-                <UploadPanel onPdfStored={handlePdfStored} />
+                <UploadPanel onPdfStored={handlePdfStored} sessionId={sessionId} />
               </div>
 
               {/* Chat fills all remaining space */}
               <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-                <ChatContainer pdfUrls={pdfUrls} />
+                <ChatContainer pdfUrls={pdfUrls} sessionId={sessionId} />
               </div>
             </div>
           </motion.div>
